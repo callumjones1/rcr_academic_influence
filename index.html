@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RCR Journal - Author Influence Database</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -27,17 +23,10 @@
             padding: 40px;
         }
 
-        h1 {
-            color: #2d3748;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
+        h1 { color: #2d3748; margin-bottom: 10px; font-size: 2.5em; }
+        h2 { color: #2d3748; margin-bottom: 15px; font-size: 1.8em; }
 
-        .subtitle {
-            color: #718096;
-            margin-bottom: 30px;
-            font-size: 1.1em;
-        }
+        .subtitle { color: #718096; margin-bottom: 30px; font-size: 1.1em; }
 
         .stats-grid {
             display: grid;
@@ -54,16 +43,8 @@
             text-align: center;
         }
 
-        .stat-value {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            opacity: 0.9;
-            font-size: 0.9em;
-        }
+        .stat-value { font-size: 2.5em; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { opacity: 0.9; font-size: 0.9em; }
 
         .controls {
             margin-bottom: 20px;
@@ -91,7 +72,7 @@
             cursor: pointer;
         }
 
-        button {
+        button, .btn {
             padding: 10px 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -100,10 +81,15 @@
             font-size: 14px;
             cursor: pointer;
             transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        button:hover {
-            transform: translateY(-2px);
+        button:hover, .btn:hover { transform: translateY(-2px); }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
         }
 
         table {
@@ -113,11 +99,7 @@
             background: white;
         }
 
-        thead {
-            background: #f7fafc;
-            position: sticky;
-            top: 0;
-        }
+        thead { background: #f7fafc; position: sticky; top: 0; z-index: 10; }
 
         th {
             padding: 15px;
@@ -127,44 +109,20 @@
             border-bottom: 2px solid #e2e8f0;
             cursor: pointer;
             user-select: none;
+            white-space: nowrap;
         }
 
-        th:hover {
-            background: #edf2f7;
-        }
+        th:hover { background: #edf2f7; }
+        th.sortable::after { content: ' \21C5'; opacity: 0.3; }
+        th.sorted-asc::after { content: ' \2191'; opacity: 1; }
+        th.sorted-desc::after { content: ' \2193'; opacity: 1; }
 
-        th.sortable::after {
-            content: ' ⇅';
-            opacity: 0.3;
-        }
+        td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover { background: #f7fafc; }
+        tr.clickable { cursor: pointer; }
+        tr.clickable:hover { background: #edf2f7; }
 
-        th.sorted-asc::after {
-            content: ' ↑';
-            opacity: 1;
-        }
-
-        th.sorted-desc::after {
-            content: ' ↓';
-            opacity: 1;
-        }
-
-        td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        tr:hover {
-            background: #f7fafc;
-        }
-
-        .rank {
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .highlight {
-            background: #fef5e7;
-        }
+        .rank { font-weight: bold; color: #667eea; }
 
         .metric-badge {
             display: inline-block;
@@ -175,21 +133,9 @@
             margin: 2px;
         }
 
-        .h-index-high {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .h-index-medium {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #718096;
-        }
+        .h-index-high { background: #d4edda; color: #155724; }
+        .h-index-medium { background: #fff3cd; color: #856404; }
+        .loading { text-align: center; padding: 40px; color: #718096; }
 
         .pagination {
             margin-top: 20px;
@@ -212,93 +158,212 @@
             color: white;
         }
 
-        .page-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Author detail panel */
+        .author-detail { display: none; }
+        .author-detail.active { display: block; }
+        .author-list.hidden { display: none; }
+
+        .back-btn {
+            margin-bottom: 20px;
+            background: #e2e8f0;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .author-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .author-info h2 { margin-bottom: 5px; }
+        .author-info .affiliation { color: #718096; font-size: 0.95em; margin-top: 8px; max-width: 700px; }
+
+        .author-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .author-metric-card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .author-metric-card .value { font-size: 1.6em; font-weight: bold; color: #667eea; }
+        .author-metric-card .label { font-size: 0.8em; color: #718096; margin-top: 4px; }
+
+        .plumx-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .plumx-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .plumx-citations { background: #dbeafe; color: #1e40af; }
+        .plumx-captures { background: #fef3c7; color: #92400e; }
+        .plumx-mentions { background: #d1fae5; color: #065f46; }
+        .plumx-social { background: #ede9fe; color: #5b21b6; }
+        .plumx-usage { background: #fce7f3; color: #9d174d; }
+        .plumx-none { background: #f3f4f6; color: #9ca3af; }
+
+        .paper-title { font-weight: 500; }
+        .paper-doi a { color: #667eea; text-decoration: none; font-size: 0.85em; }
+        .paper-doi a:hover { text-decoration: underline; }
+
+        .top-paper-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 6px;
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-
-            table {
-                font-size: 0.9em;
-            }
-
-            .controls {
-                flex-direction: column;
-            }
-
-            input[type="text"] {
-                width: 100%;
-            }
+            .container { padding: 20px; }
+            table { font-size: 0.85em; }
+            .controls { flex-direction: column; }
+            input[type="text"] { width: 100%; }
+            h1 { font-size: 1.8em; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>RCR Academic Influence Database</h1>
-        <p class="subtitle">Comprehensive Author Metrics & Analytics</p>
+        <!-- ==================== AUTHOR LIST VIEW ==================== -->
+        <div id="author-list-view" class="author-list">
+            <h1>RCR Academic Influence Database</h1>
+            <p class="subtitle">Resources, Conservation and Recycling &mdash; Comprehensive Author Metrics &amp; Analytics</p>
 
-        <div class="stats-grid" id="stats">
-            <div class="stat-card">
-                <div class="stat-value" id="total-authors">-</div>
-                <div class="stat-label">Total Authors</div>
+            <div class="stats-grid" id="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-authors">-</div>
+                    <div class="stat-label">Total Authors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-pubs">-</div>
+                    <div class="stat-label">Total Publications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-h-index">-</div>
+                    <div class="stat-label">Average h-index</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-citations">-</div>
+                    <div class="stat-label">Total Citations</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="total-pubs">-</div>
-                <div class="stat-label">Total Publications</div>
+
+            <div class="controls">
+                <input type="text" id="search" placeholder="Search authors by name or affiliation...">
+                <select id="sort-by">
+                    <option value="h_index">Sort by h-index</option>
+                    <option value="total_citations">Sort by Citations</option>
+                    <option value="total_publications">Sort by Publications</option>
+                    <option value="i10_index">Sort by i10-index</option>
+                    <option value="avg_citations_per_paper">Sort by Avg Citations</option>
+                    <option value="career_span_years">Sort by Career Span</option>
+                    <option value="recent_publications_5yr">Sort by Recent Pubs (5yr)</option>
+                    <option value="author_name">Sort by Name</option>
+                </select>
+                <select id="per-page">
+                    <option value="25">25 per page</option>
+                    <option value="50" selected>50 per page</option>
+                    <option value="100">100 per page</option>
+                    <option value="all">Show All</option>
+                </select>
+                <button onclick="exportToCSV()">Export CSV</button>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="avg-h-index">-</div>
-                <div class="stat-label">Average h-index</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="total-citations">-</div>
-                <div class="stat-label">Total Citations</div>
+
+            <div id="loading" class="loading">Loading data...</div>
+
+            <div id="table-container" style="display: none;">
+                <table id="author-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="rank">#</th>
+                            <th class="sortable" data-sort="author_name">Author</th>
+                            <th class="sortable" data-sort="h_index">h-index</th>
+                            <th class="sortable" data-sort="i10_index">i10</th>
+                            <th class="sortable" data-sort="total_publications">Pubs</th>
+                            <th class="sortable" data-sort="total_citations">Citations</th>
+                            <th class="sortable" data-sort="avg_citations_per_paper">Avg Cit.</th>
+                            <th class="sortable" data-sort="recent_publications_5yr">5yr Pubs</th>
+                            <th class="sortable" data-sort="recent_citations_5yr">5yr Cit.</th>
+                            <th class="sortable" data-sort="papers_with_plumx">PlumX</th>
+                            <th class="sortable" data-sort="career_span_years">Span</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+                <div class="pagination" id="pagination"></div>
             </div>
         </div>
 
-        <div class="controls">
-            <input type="text" id="search" placeholder="Search authors...">
-            <select id="sort-by">
-                <option value="h_index">Sort by h-index</option>
-                <option value="total_citations">Sort by Citations</option>
-                <option value="total_publications">Sort by Publications</option>
-                <option value="journal_papers">Sort by Journal Papers</option>
-                <option value="author_name">Sort by Name</option>
-            </select>
-            <select id="per-page">
-                <option value="25">25 per page</option>
-                <option value="50" selected>50 per page</option>
-                <option value="100">100 per page</option>
-                <option value="all">Show All</option>
-            </select>
-            <button onclick="exportToCSV()">Export CSV</button>
-        </div>
+        <!-- ==================== AUTHOR DETAIL VIEW ==================== -->
+        <div id="author-detail-view" class="author-detail">
+            <button class="back-btn" onclick="showAuthorList()">&larr; Back to All Authors</button>
 
-        <div id="loading" class="loading">Loading data...</div>
+            <div class="author-header">
+                <div class="author-info">
+                    <h2 id="detail-name"></h2>
+                    <div style="color: #718096; font-size: 0.9em;" id="detail-id"></div>
+                    <div class="affiliation" id="detail-affiliation"></div>
+                </div>
+            </div>
 
-        <div id="table-container" style="display: none;">
-            <table id="author-table">
+            <div class="author-metrics-grid" id="detail-metrics"></div>
+
+            <h3 style="margin-bottom: 10px;">Publications</h3>
+
+            <div class="controls">
+                <input type="text" id="paper-search" placeholder="Search papers by title or DOI...">
+                <select id="paper-sort">
+                    <option value="year">Sort by Year</option>
+                    <option value="cited_by">Sort by Citations</option>
+                    <option value="plumx_citations">Sort by PlumX Citations</option>
+                    <option value="captures">Sort by Captures</option>
+                    <option value="title">Sort by Title</option>
+                </select>
+            </div>
+
+            <div id="detail-loading" class="loading" style="display:none;">Loading papers...</div>
+
+            <table id="papers-table" style="display:none;">
                 <thead>
                     <tr>
-                        <th class="sortable" data-sort="rank">#</th>
-                        <th class="sortable" data-sort="author_name">Author</th>
-                        <th class="sortable" data-sort="h_index">h-index</th>
-                        <th class="sortable" data-sort="i10_index">i10-index</th>
-                        <th class="sortable" data-sort="total_publications">Total Pubs</th>
-                        <th class="sortable" data-sort="total_citations">Total Citations</th>
-                        <th class="sortable" data-sort="avg_citations_per_paper">Avg Citations</th>
-                        <th class="sortable" data-sort="journal_papers">Journal Papers</th>
-                        <th class="sortable" data-sort="career_span_years">Career Span</th>
+                        <th>#</th>
+                        <th class="sortable" data-psort="title">Title</th>
+                        <th class="sortable" data-psort="year">Year</th>
+                        <th class="sortable" data-psort="cited_by">Cited By</th>
+                        <th>PlumX Metrics</th>
                     </tr>
                 </thead>
-                <tbody id="table-body"></tbody>
+                <tbody id="papers-body"></tbody>
             </table>
 
-            <div class="pagination" id="pagination"></div>
+            <div class="pagination" id="papers-pagination"></div>
         </div>
     </div>
 
@@ -309,18 +374,24 @@
         let perPage = 50;
         let currentSort = { field: 'h_index', direction: 'desc' };
 
-        // Load data
+        // Paper detail state
+        let currentAuthorPapers = [];
+        let filteredPapers = [];
+        let paperPage = 1;
+        const papersPerPage = 50;
+        let paperSort = { field: 'year', direction: 'desc' };
+
+        // ===================== AUTHOR LIST =====================
+
         async function loadData() {
             try {
                 const response = await fetch('author_metrics.json');
                 const data = await response.json();
                 authorsData = data.authors;
                 filteredData = [...authorsData];
-
                 updateStats();
                 sortData(currentSort.field, currentSort.direction);
                 renderTable();
-
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('table-container').style.display = 'block';
             } catch (error) {
@@ -330,117 +401,93 @@
 
         function updateStats() {
             document.getElementById('total-authors').textContent = authorsData.length.toLocaleString();
-
             const totalPubs = authorsData.reduce((sum, a) => sum + a.total_publications, 0);
             document.getElementById('total-pubs').textContent = totalPubs.toLocaleString();
-
-            const avgHIndex = authorsData.reduce((sum, a) => sum + a.h_index, 0) / authorsData.length;
-            document.getElementById('avg-h-index').textContent = avgHIndex.toFixed(1);
-
-            const totalCitations = authorsData.reduce((sum, a) => sum + a.total_citations, 0);
-            document.getElementById('total-citations').textContent = totalCitations.toLocaleString();
+            const avgH = authorsData.reduce((sum, a) => sum + a.h_index, 0) / authorsData.length;
+            document.getElementById('avg-h-index').textContent = avgH.toFixed(1);
+            const totalCit = authorsData.reduce((sum, a) => sum + a.total_citations, 0);
+            document.getElementById('total-citations').textContent = totalCit.toLocaleString();
         }
 
         function sortData(field, direction = 'desc') {
             currentSort = { field, direction };
-
             filteredData.sort((a, b) => {
-                let aVal = a[field];
-                let bVal = b[field];
-
                 if (field === 'author_name') {
-                    return direction === 'asc'
-                        ? aVal.localeCompare(bVal)
-                        : bVal.localeCompare(aVal);
+                    return direction === 'asc' ? a[field].localeCompare(b[field]) : b[field].localeCompare(a[field]);
                 }
-
-                return direction === 'asc' ? aVal - bVal : bVal - aVal;
+                return direction === 'asc' ? (a[field]||0) - (b[field]||0) : (b[field]||0) - (a[field]||0);
             });
-
-            // Update sort indicators
-            document.querySelectorAll('th').forEach(th => {
+            document.querySelectorAll('#author-table th').forEach(th => {
                 th.classList.remove('sorted-asc', 'sorted-desc');
-                if (th.dataset.sort === field) {
-                    th.classList.add(`sorted-${direction}`);
-                }
+                if (th.dataset.sort === field) th.classList.add(`sorted-${direction}`);
             });
         }
 
         function renderTable() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
-
             const start = (currentPage - 1) * perPage;
             const end = perPage === 'all' ? filteredData.length : start + parseInt(perPage);
             const pageData = filteredData.slice(start, end);
 
-            pageData.forEach((author, index) => {
+            pageData.forEach((a, i) => {
                 const row = tbody.insertRow();
-                const globalRank = start + index + 1;
-
-                let hIndexClass = '';
-                if (author.h_index >= 50) hIndexClass = 'h-index-high';
-                else if (author.h_index >= 20) hIndexClass = 'h-index-medium';
+                row.className = 'clickable';
+                row.onclick = () => showAuthorDetail(a.author_id);
+                const rank = start + i + 1;
+                let hCls = '';
+                if (a.h_index >= 50) hCls = 'h-index-high';
+                else if (a.h_index >= 20) hCls = 'h-index-medium';
 
                 row.innerHTML = `
-                    <td class="rank">${globalRank}</td>
-                    <td><strong>${author.author_name}</strong><br><small style="color: #718096;">${author.full_name || ''}</small></td>
-                    <td><span class="metric-badge ${hIndexClass}">${author.h_index}</span></td>
-                    <td>${author.i10_index}</td>
-                    <td>${author.total_publications.toLocaleString()}</td>
-                    <td>${author.total_citations.toLocaleString()}</td>
-                    <td>${author.avg_citations_per_paper.toFixed(1)}</td>
-                    <td>${author.journal_papers}</td>
-                    <td>${author.career_span_years} years</td>
+                    <td class="rank">${rank}</td>
+                    <td><strong>${esc(a.author_name)}</strong><br><small style="color:#718096">${esc(a.full_name||'')}</small></td>
+                    <td><span class="metric-badge ${hCls}">${a.h_index}</span></td>
+                    <td>${a.i10_index}</td>
+                    <td>${a.total_publications.toLocaleString()}</td>
+                    <td>${a.total_citations.toLocaleString()}</td>
+                    <td>${a.avg_citations_per_paper.toFixed(1)}</td>
+                    <td>${a.recent_publications_5yr}</td>
+                    <td>${(a.recent_citations_5yr||0).toLocaleString()}</td>
+                    <td>${a.papers_with_plumx}</td>
+                    <td>${a.career_span_years}yr</td>
                 `;
             });
-
-            renderPagination();
+            renderPagination('pagination', filteredData.length, perPage, currentPage, changePage);
         }
 
-        function renderPagination() {
-            const pagination = document.getElementById('pagination');
-            const totalPages = Math.ceil(filteredData.length / perPage);
+        function renderPagination(containerId, totalItems, itemsPerPage, page, callback) {
+            const el = document.getElementById(containerId);
+            if (itemsPerPage === 'all') { el.innerHTML = ''; return; }
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (totalPages <= 1) { el.innerHTML = ''; return; }
 
-            if (perPage === 'all' || totalPages <= 1) {
-                pagination.innerHTML = '';
-                return;
+            let html = `<button class="page-btn" ${page===1?'disabled':''} onclick="${callback.name}(${page-1})">Prev</button>`;
+
+            let startP = Math.max(1, page - 4);
+            let endP = Math.min(totalPages, startP + 9);
+            if (endP - startP < 9) startP = Math.max(1, endP - 9);
+
+            if (startP > 1) html += `<button class="page-btn" onclick="${callback.name}(1)">1</button><span>...</span>`;
+            for (let i = startP; i <= endP; i++) {
+                html += `<button class="page-btn ${i===page?'active':''}" onclick="${callback.name}(${i})">${i}</button>`;
             }
+            if (endP < totalPages) html += `<span>...</span><button class="page-btn" onclick="${callback.name}(${totalPages})">${totalPages}</button>`;
 
-            let html = `
-                <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Previous</button>
-            `;
-
-            for (let i = 1; i <= Math.min(totalPages, 10); i++) {
-                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-            }
-
-            if (totalPages > 10) {
-                html += `<span>... ${totalPages}</span>`;
-            }
-
-            html += `
-                <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>
-            `;
-
-            pagination.innerHTML = html;
+            html += `<button class="page-btn" ${page===totalPages?'disabled':''} onclick="${callback.name}(${page+1})">Next</button>`;
+            el.innerHTML = html;
         }
 
-        function changePage(page) {
-            currentPage = page;
-            renderTable();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        function changePage(p) { currentPage = p; renderTable(); window.scrollTo({top:0,behavior:'smooth'}); }
 
         function searchAuthors(query) {
-            if (!query) {
-                filteredData = [...authorsData];
-            } else {
-                const lowerQuery = query.toLowerCase();
-                filteredData = authorsData.filter(author =>
-                    author.author_name.toLowerCase().includes(lowerQuery) ||
-                    (author.full_name && author.full_name.toLowerCase().includes(lowerQuery)) ||
-                    (author.affiliation && author.affiliation.toLowerCase().includes(lowerQuery))
+            if (!query) { filteredData = [...authorsData]; }
+            else {
+                const q = query.toLowerCase();
+                filteredData = authorsData.filter(a =>
+                    a.author_name.toLowerCase().includes(q) ||
+                    (a.full_name && a.full_name.toLowerCase().includes(q)) ||
+                    (a.affiliation && a.affiliation.toLowerCase().includes(q))
                 );
             }
             currentPage = 1;
@@ -449,55 +496,234 @@
         }
 
         function exportToCSV() {
-            const csv = [
-                ['Rank', 'Author', 'Full Name', 'h-index', 'i10-index', 'Total Pubs', 'Total Citations', 'Avg Citations', 'Journal Papers', 'Career Span'],
-                ...filteredData.map((a, i) => [
-                    i + 1,
-                    a.author_name,
-                    a.full_name,
-                    a.h_index,
-                    a.i10_index,
-                    a.total_publications,
-                    a.total_citations,
-                    a.avg_citations_per_paper,
-                    a.journal_papers,
-                    a.career_span_years
-                ])
-            ].map(row => row.join(',')).join('\n');
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'tpv_author_metrics.csv';
-            a.click();
+            const headers = ['Rank','Author','Full Name','Affiliation','h-index','i10-index',
+                'Total Pubs','Total Citations','Avg Citations','Career Span',
+                'First Year','Latest Year','Productivity Rate',
+                'Recent Pubs 5yr','Recent Citations 5yr',
+                'Top Paper Citations','Top Paper Title','Papers with PlumX'];
+            const rows = filteredData.map((a, i) => [
+                i+1, csvQ(a.author_name), csvQ(a.full_name), csvQ(a.affiliation),
+                a.h_index, a.i10_index, a.total_publications, a.total_citations,
+                a.avg_citations_per_paper, a.career_span_years,
+                a.first_publication_year, a.latest_publication_year, a.productivity_rate,
+                a.recent_publications_5yr, a.recent_citations_5yr,
+                a.top_paper_citations, csvQ(a.top_paper_title), a.papers_with_plumx
+            ]);
+            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            download(csv, 'rcr_author_metrics.csv', 'text/csv');
         }
 
-        // Event listeners
-        document.getElementById('search').addEventListener('input', (e) => searchAuthors(e.target.value));
+        // ===================== AUTHOR DETAIL =====================
 
-        document.getElementById('sort-by').addEventListener('change', (e) => {
-            const field = e.target.value;
-            sortData(field, field === 'author_name' ? 'asc' : 'desc');
+        async function showAuthorDetail(authorId) {
+            document.getElementById('author-list-view').classList.add('hidden');
+            document.getElementById('author-detail-view').classList.add('active');
+            document.getElementById('detail-loading').style.display = 'block';
+            document.getElementById('papers-table').style.display = 'none';
+
+            // Fill summary from already-loaded data
+            const author = authorsData.find(a => a.author_id === authorId);
+            if (author) {
+                document.getElementById('detail-name').textContent = author.full_name || author.author_name;
+                document.getElementById('detail-id').textContent = `Scopus ID: ${author.author_id}`;
+                document.getElementById('detail-affiliation').textContent = cleanAffiliation(author.affiliation);
+                document.getElementById('detail-metrics').innerHTML = `
+                    <div class="author-metric-card"><div class="value">${author.h_index}</div><div class="label">h-index</div></div>
+                    <div class="author-metric-card"><div class="value">${author.i10_index}</div><div class="label">i10-index</div></div>
+                    <div class="author-metric-card"><div class="value">${author.total_publications.toLocaleString()}</div><div class="label">Publications</div></div>
+                    <div class="author-metric-card"><div class="value">${author.total_citations.toLocaleString()}</div><div class="label">Citations</div></div>
+                    <div class="author-metric-card"><div class="value">${author.avg_citations_per_paper.toFixed(1)}</div><div class="label">Avg Citations</div></div>
+                    <div class="author-metric-card"><div class="value">${author.career_span_years}</div><div class="label">Career (years)</div></div>
+                    <div class="author-metric-card"><div class="value">${author.recent_publications_5yr}</div><div class="label">5yr Pubs</div></div>
+                    <div class="author-metric-card"><div class="value">${(author.recent_citations_5yr||0).toLocaleString()}</div><div class="label">5yr Citations</div></div>
+                    <div class="author-metric-card"><div class="value">${author.papers_with_plumx}</div><div class="label">PlumX Coverage</div></div>
+                    <div class="author-metric-card"><div class="value">${author.productivity_rate}</div><div class="label">Pubs/Year</div></div>
+                `;
+            }
+
+            // Load per-author paper data
+            try {
+                const resp = await fetch(`authors/${authorId}.json`);
+                const data = await resp.json();
+                currentAuthorPapers = data.papers || [];
+                filteredPapers = [...currentAuthorPapers];
+                paperPage = 1;
+                paperSort = { field: 'year', direction: 'desc' };
+                sortPapers(paperSort.field, paperSort.direction);
+                renderPapers();
+                document.getElementById('detail-loading').style.display = 'none';
+                document.getElementById('papers-table').style.display = 'table';
+            } catch (e) {
+                document.getElementById('detail-loading').innerHTML = 'Error loading papers: ' + e.message;
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showAuthorList() {
+            document.getElementById('author-detail-view').classList.remove('active');
+            document.getElementById('author-list-view').classList.remove('hidden');
+            document.getElementById('paper-search').value = '';
+        }
+
+        function sortPapers(field, direction) {
+            paperSort = { field, direction };
+            filteredPapers.sort((a, b) => {
+                let av, bv;
+                if (field === 'title') {
+                    return direction === 'asc' ? (a.title||'').localeCompare(b.title||'') : (b.title||'').localeCompare(a.title||'');
+                } else if (field === 'plumx_citations') {
+                    av = a.plumx ? (a.plumx.citation_total || 0) : 0;
+                    bv = b.plumx ? (b.plumx.citation_total || 0) : 0;
+                } else if (field === 'captures') {
+                    av = a.plumx ? (a.plumx.capture_total || 0) : 0;
+                    bv = b.plumx ? (b.plumx.capture_total || 0) : 0;
+                } else {
+                    av = a[field] || 0;
+                    bv = b[field] || 0;
+                }
+                return direction === 'asc' ? av - bv : bv - av;
+            });
+        }
+
+        function renderPapers() {
+            const tbody = document.getElementById('papers-body');
+            tbody.innerHTML = '';
+            const start = (paperPage - 1) * papersPerPage;
+            const end = start + papersPerPage;
+            const page = filteredPapers.slice(start, end);
+
+            const maxCited = Math.max(...currentAuthorPapers.map(p => p.cited_by || 0));
+
+            page.forEach((p, i) => {
+                const row = tbody.insertRow();
+                const isTop = p.cited_by === maxCited && maxCited > 0;
+
+                let plumxHtml = '';
+                if (p.plumx) {
+                    const px = p.plumx;
+                    const chips = [];
+                    if (px.citation_total) chips.push(`<span class="plumx-chip plumx-citations">Cit: ${px.citation_total}</span>`);
+                    if (px.capture_total) chips.push(`<span class="plumx-chip plumx-captures">Cap: ${px.capture_total}</span>`);
+                    if (px.mention_total) chips.push(`<span class="plumx-chip plumx-mentions">Men: ${px.mention_total}</span>`);
+                    if (px.social_media) chips.push(`<span class="plumx-chip plumx-social">Soc: ${px.social_media}</span>`);
+                    if (px.usage_count) chips.push(`<span class="plumx-chip plumx-usage">Use: ${px.usage_count}</span>`);
+                    plumxHtml = chips.length ? `<div class="plumx-bar">${chips.join('')}</div>` : '<span class="plumx-chip plumx-none">No metrics</span>';
+                } else {
+                    plumxHtml = '<span class="plumx-chip plumx-none">N/A</span>';
+                }
+
+                const doiLink = p.doi ? `<div class="paper-doi"><a href="https://doi.org/${p.doi}" target="_blank">${p.doi}</a></div>` : '';
+
+                row.innerHTML = `
+                    <td>${start + i + 1}</td>
+                    <td>
+                        <div class="paper-title">${esc(p.title||'Untitled')}${isTop ? '<span class="top-paper-badge">TOP</span>' : ''}</div>
+                        ${doiLink}
+                    </td>
+                    <td>${p.year || '-'}</td>
+                    <td>${(p.cited_by||0).toLocaleString()}</td>
+                    <td>${plumxHtml}</td>
+                `;
+            });
+
+            renderPagination('papers-pagination', filteredPapers.length, papersPerPage, paperPage, changePaperPage);
+        }
+
+        function changePaperPage(p) { paperPage = p; renderPapers(); }
+
+        function searchPapers(query) {
+            if (!query) { filteredPapers = [...currentAuthorPapers]; }
+            else {
+                const q = query.toLowerCase();
+                filteredPapers = currentAuthorPapers.filter(p =>
+                    (p.title && p.title.toLowerCase().includes(q)) ||
+                    (p.doi && p.doi.toLowerCase().includes(q))
+                );
+            }
+            paperPage = 1;
+            sortPapers(paperSort.field, paperSort.direction);
+            renderPapers();
+        }
+
+        // ===================== UTILITIES =====================
+
+        function esc(s) {
+            const d = document.createElement('div');
+            d.textContent = s || '';
+            return d.innerHTML;
+        }
+
+        function csvQ(s) {
+            if (!s) return '';
+            return '"' + String(s).replace(/"/g, '""') + '"';
+        }
+
+        function download(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename; a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function cleanAffiliation(aff) {
+            if (!aff) return '';
+            // Handle JSON-like affiliation strings from the database
+            try {
+                if (aff.startsWith('[')) {
+                    const parsed = JSON.parse(aff.replace(/'/g, '"'));
+                    if (Array.isArray(parsed)) {
+                        return parsed.map(a => a.Affiliation || a.affiliation || '').filter(Boolean).join(' | ');
+                    }
+                }
+            } catch(e) {}
+            return aff;
+        }
+
+        // ===================== EVENT LISTENERS =====================
+
+        document.getElementById('search').addEventListener('input', e => searchAuthors(e.target.value));
+
+        document.getElementById('sort-by').addEventListener('change', e => {
+            const f = e.target.value;
+            sortData(f, f === 'author_name' ? 'asc' : 'desc');
             renderTable();
         });
 
-        document.getElementById('per-page').addEventListener('change', (e) => {
+        document.getElementById('per-page').addEventListener('change', e => {
             perPage = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
             currentPage = 1;
             renderTable();
         });
 
-        document.querySelectorAll('th.sortable').forEach(th => {
+        document.querySelectorAll('#author-table th.sortable').forEach(th => {
             th.addEventListener('click', () => {
-                const field = th.dataset.sort;
-                const direction = currentSort.field === field && currentSort.direction === 'desc' ? 'asc' : 'desc';
-                sortData(field, direction);
+                const f = th.dataset.sort;
+                const dir = currentSort.field === f && currentSort.direction === 'desc' ? 'asc' : 'desc';
+                sortData(f, dir);
                 renderTable();
             });
         });
 
-        // Load data on page load
+        document.getElementById('paper-search').addEventListener('input', e => searchPapers(e.target.value));
+
+        document.getElementById('paper-sort').addEventListener('change', e => {
+            const f = e.target.value;
+            sortPapers(f, f === 'title' ? 'asc' : 'desc');
+            renderPapers();
+        });
+
+        document.querySelectorAll('#papers-table th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const f = th.dataset.psort;
+                const dir = paperSort.field === f && paperSort.direction === 'desc' ? 'asc' : 'desc';
+                sortPapers(f, dir);
+                renderPapers();
+            });
+        });
+
+        // ===================== INIT =====================
         loadData();
     </script>
 </body>
