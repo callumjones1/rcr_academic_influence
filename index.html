@@ -116,7 +116,6 @@
         th.sorted-asc::after { content: ' \2191'; opacity: 1; }
         th.sorted-desc::after { content: ' \2193'; opacity: 1; }
 
-        /* PlumX column header colors */
         th.px-cit { border-top: 3px solid #3b82f6; }
         th.px-cap { border-top: 3px solid #f59e0b; }
         th.px-men { border-top: 3px solid #10b981; }
@@ -168,7 +167,6 @@
 
         .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Author detail panel */
         .author-detail { display: none; }
         .author-detail.active { display: block; }
         .author-list.hidden { display: none; }
@@ -221,16 +219,6 @@
         .paper-doi a { color: #667eea; text-decoration: none; font-size: 0.85em; }
         .paper-doi a:hover { text-decoration: underline; }
 
-        .section-label {
-            font-size: 0.75em;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #a0aec0;
-            padding: 8px 8px 4px;
-            font-weight: 600;
-        }
-
-        /* Colored PlumX cell values */
         .px-val-cit { color: #2563eb; font-weight: 500; }
         .px-val-cap { color: #d97706; font-weight: 500; }
         .px-val-men { color: #059669; font-weight: 500; }
@@ -303,7 +291,7 @@
                 <table id="author-table">
                     <thead>
                         <tr>
-                            <th class="sortable" data-sort="rank">#</th>
+                            <th>#</th>
                             <th class="sortable" data-sort="author_name">Author</th>
                             <th class="sortable" data-sort="h_index">h-index</th>
                             <th class="sortable" data-sort="i10_index">i10</th>
@@ -394,18 +382,22 @@
         let perPage = 50;
         let currentSort = { field: 'h_index', direction: 'desc' };
 
-        // Paper detail state
         let currentAuthorPapers = [];
         let filteredPapers = [];
         let paperPage = 1;
         const papersPerPage = 50;
         let paperSort = { field: 'year', direction: 'desc' };
 
+        // Safe number helper
+        function n(v) { return (typeof v === 'number' && !isNaN(v)) ? v : 0; }
+        function fmt(v) { return n(v).toLocaleString(); }
+
         // ===================== AUTHOR LIST =====================
 
         async function loadData() {
             try {
-                const response = await fetch('author_metrics.json');
+                // Cache-bust to ensure fresh data
+                const response = await fetch('author_metrics.json?v=' + Date.now());
                 const data = await response.json();
                 authorsData = data.authors;
                 filteredData = [...authorsData];
@@ -421,33 +413,36 @@
 
         function updateStats() {
             document.getElementById('total-authors').textContent = authorsData.length.toLocaleString();
-            const totalPubs = authorsData.reduce((sum, a) => sum + a.total_publications, 0);
-            document.getElementById('total-pubs').textContent = totalPubs.toLocaleString();
-            const avgH = authorsData.reduce((sum, a) => sum + a.h_index, 0) / authorsData.length;
-            document.getElementById('avg-h-index').textContent = avgH.toFixed(1);
-            const totalCit = authorsData.reduce((sum, a) => sum + a.total_citations, 0);
-            document.getElementById('total-citations').textContent = totalCit.toLocaleString();
+            document.getElementById('total-pubs').textContent = fmt(authorsData.reduce((s, a) => s + n(a.total_publications), 0));
+            document.getElementById('avg-h-index').textContent = (authorsData.reduce((s, a) => s + n(a.h_index), 0) / authorsData.length).toFixed(1);
+            document.getElementById('total-citations').textContent = fmt(authorsData.reduce((s, a) => s + n(a.total_citations), 0));
         }
 
-        function sortData(field, direction = 'desc') {
+        function sortData(field, direction) {
             currentSort = { field, direction };
             filteredData.sort((a, b) => {
                 if (field === 'author_name') {
-                    return direction === 'asc' ? a[field].localeCompare(b[field]) : b[field].localeCompare(a[field]);
+                    return direction === 'asc' ? (a.author_name||'').localeCompare(b.author_name||'') : (b.author_name||'').localeCompare(a.author_name||'');
                 }
-                return direction === 'asc' ? (a[field]||0) - (b[field]||0) : (b[field]||0) - (a[field]||0);
+                return direction === 'asc' ? n(a[field]) - n(b[field]) : n(b[field]) - n(a[field]);
             });
             document.querySelectorAll('#author-table th').forEach(th => {
                 th.classList.remove('sorted-asc', 'sorted-desc');
-                if (th.dataset.sort === field) th.classList.add(`sorted-${direction}`);
+                if (th.dataset.sort === field) th.classList.add('sorted-' + direction);
             });
+        }
+
+        function getPerPage() {
+            // Always return a safe numeric value for pagination math
+            return (perPage === 'all') ? filteredData.length : Number(perPage) || 50;
         }
 
         function renderTable() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
-            const start = (currentPage - 1) * perPage;
-            const end = perPage === 'all' ? filteredData.length : start + parseInt(perPage);
+            const pp = getPerPage();
+            const start = (currentPage - 1) * pp;
+            const end = start + pp;
             const pageData = filteredData.slice(start, end);
 
             pageData.forEach((a, i) => {
@@ -456,47 +451,45 @@
                 row.onclick = () => showAuthorDetail(a.author_id);
                 const rank = start + i + 1;
                 let hCls = '';
-                if (a.h_index >= 50) hCls = 'h-index-high';
-                else if (a.h_index >= 20) hCls = 'h-index-medium';
+                if (n(a.h_index) >= 50) hCls = 'h-index-high';
+                else if (n(a.h_index) >= 20) hCls = 'h-index-medium';
 
-                row.innerHTML = `
-                    <td class="rank">${rank}</td>
-                    <td><strong>${esc(a.author_name)}</strong><br><small style="color:#718096">${esc(a.full_name||'')}</small></td>
-                    <td><span class="metric-badge ${hCls}">${a.h_index}</span></td>
-                    <td>${a.i10_index}</td>
-                    <td>${a.total_publications.toLocaleString()}</td>
-                    <td>${a.total_citations.toLocaleString()}</td>
-                    <td>${a.avg_citations_per_paper.toFixed(1)}</td>
-                    <td>${a.career_span_years}yr</td>
-                    <td>${a.recent_publications_5yr}</td>
-                    <td class="px-val-cit">${(a.plumx_citations||0).toLocaleString()}</td>
-                    <td class="px-val-cap">${(a.plumx_captures||0).toLocaleString()}</td>
-                    <td class="px-val-read">${(a.plumx_readers||0).toLocaleString()}</td>
-                    <td class="px-val-men">${(a.plumx_mentions||0).toLocaleString()}</td>
-                    <td class="px-val-news">${(a.plumx_news||0).toLocaleString()}</td>
-                    <td class="px-val-soc">${(a.plumx_social_media||0).toLocaleString()}</td>
-                    <td class="px-val-use">${(a.plumx_usage||0).toLocaleString()}</td>
-                `;
+                row.innerHTML =
+                    '<td class="rank">' + rank + '</td>' +
+                    '<td><strong>' + esc(a.author_name) + '</strong><br><small style="color:#718096">' + esc(a.full_name||'') + '</small></td>' +
+                    '<td><span class="metric-badge ' + hCls + '">' + n(a.h_index) + '</span></td>' +
+                    '<td>' + n(a.i10_index) + '</td>' +
+                    '<td>' + fmt(a.total_publications) + '</td>' +
+                    '<td>' + fmt(a.total_citations) + '</td>' +
+                    '<td>' + n(a.avg_citations_per_paper).toFixed(1) + '</td>' +
+                    '<td>' + n(a.career_span_years) + 'yr</td>' +
+                    '<td>' + n(a.recent_publications_5yr) + '</td>' +
+                    '<td class="px-val-cit">' + fmt(a.plumx_citations) + '</td>' +
+                    '<td class="px-val-cap">' + fmt(a.plumx_captures) + '</td>' +
+                    '<td class="px-val-read">' + fmt(a.plumx_readers) + '</td>' +
+                    '<td class="px-val-men">' + fmt(a.plumx_mentions) + '</td>' +
+                    '<td class="px-val-news">' + fmt(a.plumx_news) + '</td>' +
+                    '<td class="px-val-soc">' + fmt(a.plumx_social_media) + '</td>' +
+                    '<td class="px-val-use">' + fmt(a.plumx_usage) + '</td>';
             });
-            renderPagination('pagination', filteredData.length, perPage, currentPage, changePage);
+            renderPagination('pagination', filteredData.length, pp, currentPage, 'changePage');
         }
 
-        function renderPagination(containerId, totalItems, itemsPerPage, page, callback) {
+        function renderPagination(containerId, totalItems, itemsPerPage, page, callbackName) {
             const el = document.getElementById(containerId);
-            if (itemsPerPage === 'all') { el.innerHTML = ''; return; }
             const totalPages = Math.ceil(totalItems / itemsPerPage);
             if (totalPages <= 1) { el.innerHTML = ''; return; }
 
-            let html = `<button class="page-btn" ${page===1?'disabled':''} onclick="${callback.name}(${page-1})">Prev</button>`;
+            let html = '<button class="page-btn" ' + (page===1?'disabled':'') + ' onclick="' + callbackName + '(' + (page-1) + ')">Prev</button>';
             let startP = Math.max(1, page - 4);
             let endP = Math.min(totalPages, startP + 9);
             if (endP - startP < 9) startP = Math.max(1, endP - 9);
-            if (startP > 1) html += `<button class="page-btn" onclick="${callback.name}(1)">1</button><span>...</span>`;
+            if (startP > 1) html += '<button class="page-btn" onclick="' + callbackName + '(1)">1</button><span>...</span>';
             for (let i = startP; i <= endP; i++) {
-                html += `<button class="page-btn ${i===page?'active':''}" onclick="${callback.name}(${i})">${i}</button>`;
+                html += '<button class="page-btn ' + (i===page?'active':'') + '" onclick="' + callbackName + '(' + i + ')">' + i + '</button>';
             }
-            if (endP < totalPages) html += `<span>...</span><button class="page-btn" onclick="${callback.name}(${totalPages})">${totalPages}</button>`;
-            html += `<button class="page-btn" ${page===totalPages?'disabled':''} onclick="${callback.name}(${page+1})">Next</button>`;
+            if (endP < totalPages) html += '<span>...</span><button class="page-btn" onclick="' + callbackName + '(' + totalPages + ')">' + totalPages + '</button>';
+            html += '<button class="page-btn" ' + (page===totalPages?'disabled':'') + ' onclick="' + callbackName + '(' + (page+1) + ')">Next</button>';
             el.innerHTML = html;
         }
 
@@ -507,9 +500,9 @@
             else {
                 const q = query.toLowerCase();
                 filteredData = authorsData.filter(a =>
-                    a.author_name.toLowerCase().includes(q) ||
-                    (a.full_name && a.full_name.toLowerCase().includes(q)) ||
-                    (a.affiliation && a.affiliation.toLowerCase().includes(q))
+                    (a.author_name||'').toLowerCase().includes(q) ||
+                    (a.full_name||'').toLowerCase().includes(q) ||
+                    (a.affiliation||'').toLowerCase().includes(q)
                 );
             }
             currentPage = 1;
@@ -528,14 +521,14 @@
                 'PlumX Scopus Cit.','PlumX CrossRef Cit.'];
             const rows = filteredData.map((a, i) => [
                 i+1, csvQ(a.author_name), csvQ(a.full_name), csvQ(a.affiliation),
-                a.h_index, a.i10_index, a.total_publications, a.total_citations,
-                a.avg_citations_per_paper, a.career_span_years,
-                a.first_publication_year, a.latest_publication_year, a.productivity_rate,
-                a.recent_publications_5yr, a.recent_citations_5yr,
-                a.top_paper_citations, csvQ(a.top_paper_title), a.papers_with_plumx,
-                a.plumx_citations||0, a.plumx_captures||0, a.plumx_readers||0,
-                a.plumx_mentions||0, a.plumx_news||0, a.plumx_social_media||0, a.plumx_usage||0,
-                a.plumx_scopus_citations||0, a.plumx_crossref_citations||0
+                n(a.h_index), n(a.i10_index), n(a.total_publications), n(a.total_citations),
+                n(a.avg_citations_per_paper), n(a.career_span_years),
+                n(a.first_publication_year), n(a.latest_publication_year), n(a.productivity_rate),
+                n(a.recent_publications_5yr), n(a.recent_citations_5yr),
+                n(a.top_paper_citations), csvQ(a.top_paper_title), n(a.papers_with_plumx),
+                n(a.plumx_citations), n(a.plumx_captures), n(a.plumx_readers),
+                n(a.plumx_mentions), n(a.plumx_news), n(a.plumx_social_media), n(a.plumx_usage),
+                n(a.plumx_scopus_citations), n(a.plumx_crossref_citations)
             ]);
             const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
             download(csv, 'rcr_author_metrics.csv', 'text/csv');
@@ -543,19 +536,16 @@
 
         // ===================== AUTHOR DETAIL =====================
 
-        function pxVal(paper, field) {
+        function pxPaperVal(paper, field) {
             if (!paper.plumx) return 0;
-            return paper.plumx[field] || 0;
+            return n(paper.plumx[field]);
         }
 
         function getPaperSortVal(p, field) {
             if (field === 'title') return p.title || '';
-            if (field === 'year') return p.year || 0;
-            if (field === 'cited_by') return p.cited_by || 0;
-            if (field.startsWith('px_')) {
-                const pxField = field.substring(3); // remove 'px_'
-                return pxVal(p, pxField);
-            }
+            if (field === 'year') return n(p.year);
+            if (field === 'cited_by') return n(p.cited_by);
+            if (field.startsWith('px_')) return pxPaperVal(p, field.substring(3));
             return 0;
         }
 
@@ -565,35 +555,55 @@
             document.getElementById('detail-loading').style.display = 'block';
             document.getElementById('papers-table').style.display = 'none';
 
+            // Fill basic info from summary data
             const author = authorsData.find(a => a.author_id === authorId);
             if (author) {
                 document.getElementById('detail-name').textContent = author.full_name || author.author_name;
-                document.getElementById('detail-id').textContent = `Scopus ID: ${author.author_id}`;
+                document.getElementById('detail-id').textContent = 'Scopus ID: ' + author.author_id;
                 document.getElementById('detail-affiliation').textContent = cleanAffiliation(author.affiliation);
-                document.getElementById('detail-metrics').innerHTML = `
-                    <div class="author-metric-card"><div class="value">${author.h_index}</div><div class="label">h-index</div></div>
-                    <div class="author-metric-card"><div class="value">${author.i10_index}</div><div class="label">i10-index</div></div>
-                    <div class="author-metric-card"><div class="value">${author.total_publications.toLocaleString()}</div><div class="label">Publications</div></div>
-                    <div class="author-metric-card"><div class="value">${author.total_citations.toLocaleString()}</div><div class="label">Scopus Citations</div></div>
-                    <div class="author-metric-card"><div class="value">${author.avg_citations_per_paper.toFixed(1)}</div><div class="label">Avg Citations</div></div>
-                    <div class="author-metric-card"><div class="value">${author.career_span_years}</div><div class="label">Career (years)</div></div>
-                    <div class="author-metric-card"><div class="value">${author.recent_publications_5yr}</div><div class="label">5yr Pubs</div></div>
-                    <div class="author-metric-card"><div class="value">${(author.recent_citations_5yr||0).toLocaleString()}</div><div class="label">5yr Citations</div></div>
-                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_citations||0).toLocaleString()}</div><div class="label">PlumX Citations</div></div>
-                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_captures||0).toLocaleString()}</div><div class="label">PlumX Captures</div></div>
-                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_readers||0).toLocaleString()}</div><div class="label">PlumX Readers</div></div>
-                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_mentions||0).toLocaleString()}</div><div class="label">PlumX Mentions</div></div>
-                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_news||0).toLocaleString()}</div><div class="label">PlumX News</div></div>
-                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_social_media||0).toLocaleString()}</div><div class="label">PlumX Social</div></div>
-                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_usage||0).toLocaleString()}</div><div class="label">PlumX Usage</div></div>
-                `;
             }
 
+            // Load per-author papers and compute PlumX totals from actual paper data
             try {
-                const resp = await fetch(`authors/${authorId}.json`);
+                const resp = await fetch('authors/' + authorId + '.json?v=' + Date.now());
                 const data = await resp.json();
                 currentAuthorPapers = data.papers || [];
                 filteredPapers = [...currentAuthorPapers];
+
+                // Compute PlumX aggregates from the papers themselves
+                let pxCit = 0, pxCap = 0, pxRead = 0, pxMen = 0, pxNews = 0, pxSoc = 0, pxUse = 0;
+                currentAuthorPapers.forEach(p => {
+                    if (p.plumx) {
+                        pxCit  += n(p.plumx.citation_total);
+                        pxCap  += n(p.plumx.capture_total);
+                        pxRead += n(p.plumx.reader_count);
+                        pxMen  += n(p.plumx.mention_total);
+                        pxNews += n(p.plumx.news_count);
+                        pxSoc  += n(p.plumx.social_media);
+                        pxUse  += n(p.plumx.usage_count);
+                    }
+                });
+
+                // Render metric cards using author summary + computed PlumX
+                if (author) {
+                    document.getElementById('detail-metrics').innerHTML =
+                        mc(n(author.h_index), 'h-index') +
+                        mc(n(author.i10_index), 'i10-index') +
+                        mc(fmt(author.total_publications), 'Publications') +
+                        mc(fmt(author.total_citations), 'Scopus Citations') +
+                        mc(n(author.avg_citations_per_paper).toFixed(1), 'Avg Citations') +
+                        mc(n(author.career_span_years), 'Career (years)') +
+                        mc(n(author.recent_publications_5yr), '5yr Pubs') +
+                        mc(fmt(author.recent_citations_5yr), '5yr Citations') +
+                        mc(fmt(pxCit), 'PlumX Citations', true) +
+                        mc(fmt(pxCap), 'PlumX Captures', true) +
+                        mc(fmt(pxRead), 'PlumX Readers', true) +
+                        mc(fmt(pxMen), 'PlumX Mentions', true) +
+                        mc(fmt(pxNews), 'PlumX News', true) +
+                        mc(fmt(pxSoc), 'PlumX Social', true) +
+                        mc(fmt(pxUse), 'PlumX Usage', true);
+                }
+
                 paperPage = 1;
                 paperSort = { field: 'year', direction: 'desc' };
                 sortPapers(paperSort.field, paperSort.direction);
@@ -605,6 +615,10 @@
             }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function mc(value, label, isPlumx) {
+            return '<div class="author-metric-card' + (isPlumx ? ' plumx-card' : '') + '"><div class="value">' + value + '</div><div class="label">' + label + '</div></div>';
         }
 
         function showAuthorList() {
@@ -623,10 +637,9 @@
                 }
                 return direction === 'asc' ? av - bv : bv - av;
             });
-            // Update header indicators
             document.querySelectorAll('#papers-table th').forEach(th => {
                 th.classList.remove('sorted-asc', 'sorted-desc');
-                if (th.dataset.psort === field) th.classList.add(`sorted-${direction}`);
+                if (th.dataset.psort === field) th.classList.add('sorted-' + direction);
             });
         }
 
@@ -636,39 +649,35 @@
             const start = (paperPage - 1) * papersPerPage;
             const end = start + papersPerPage;
             const page = filteredPapers.slice(start, end);
-            const maxCited = Math.max(...currentAuthorPapers.map(p => p.cited_by || 0));
+            const maxCited = currentAuthorPapers.length ? Math.max(...currentAuthorPapers.map(p => n(p.cited_by))) : 0;
 
             page.forEach((p, i) => {
                 const row = tbody.insertRow();
-                const isTop = p.cited_by === maxCited && maxCited > 0;
-                const doiLink = p.doi ? `<div class="paper-doi"><a href="https://doi.org/${p.doi}" target="_blank">${p.doi}</a></div>` : '';
+                const isTop = n(p.cited_by) === maxCited && maxCited > 0;
+                const doiLink = p.doi ? '<div class="paper-doi"><a href="https://doi.org/' + esc(p.doi) + '" target="_blank">' + esc(p.doi) + '</a></div>' : '';
 
-                row.innerHTML = `
-                    <td>${start + i + 1}</td>
-                    <td>
-                        <div class="paper-title">${esc(p.title||'Untitled')}${isTop ? '<span class="top-paper-badge">TOP</span>' : ''}</div>
-                        ${doiLink}
-                    </td>
-                    <td>${p.year || '-'}</td>
-                    <td>${(p.cited_by||0).toLocaleString()}</td>
-                    <td class="px-val-cit">${fmtPx(p,'citation_total')}</td>
-                    <td class="px-val-cap">${fmtPx(p,'capture_total')}</td>
-                    <td class="px-val-read">${fmtPx(p,'reader_count')}</td>
-                    <td class="px-val-men">${fmtPx(p,'mention_total')}</td>
-                    <td class="px-val-news">${fmtPx(p,'news_count')}</td>
-                    <td class="px-val-soc">${fmtPx(p,'social_media')}</td>
-                    <td class="px-val-use">${fmtPx(p,'usage_count')}</td>
-                `;
+                row.innerHTML =
+                    '<td>' + (start + i + 1) + '</td>' +
+                    '<td><div class="paper-title">' + esc(p.title||'Untitled') + (isTop ? '<span class="top-paper-badge">TOP</span>' : '') + '</div>' + doiLink + '</td>' +
+                    '<td>' + (p.year || '-') + '</td>' +
+                    '<td>' + fmt(p.cited_by) + '</td>' +
+                    '<td class="px-val-cit">' + fmtPx(p, 'citation_total') + '</td>' +
+                    '<td class="px-val-cap">' + fmtPx(p, 'capture_total') + '</td>' +
+                    '<td class="px-val-read">' + fmtPx(p, 'reader_count') + '</td>' +
+                    '<td class="px-val-men">' + fmtPx(p, 'mention_total') + '</td>' +
+                    '<td class="px-val-news">' + fmtPx(p, 'news_count') + '</td>' +
+                    '<td class="px-val-soc">' + fmtPx(p, 'social_media') + '</td>' +
+                    '<td class="px-val-use">' + fmtPx(p, 'usage_count') + '</td>';
             });
 
-            renderPagination('papers-pagination', filteredPapers.length, papersPerPage, paperPage, changePaperPage);
+            renderPagination('papers-pagination', filteredPapers.length, papersPerPage, paperPage, 'changePaperPage');
         }
 
         function fmtPx(paper, field) {
             if (!paper.plumx) return '<span style="color:#d1d5db">-</span>';
-            const v = paper.plumx[field];
-            if (v === null || v === undefined || v === 0) return '0';
-            return v.toLocaleString();
+            var v = paper.plumx[field];
+            if (v === null || v === undefined) return '0';
+            return n(v).toLocaleString();
         }
 
         function changePaperPage(p) { paperPage = p; renderPapers(); }
@@ -690,7 +699,7 @@
         // ===================== UTILITIES =====================
 
         function esc(s) {
-            const d = document.createElement('div');
+            var d = document.createElement('div');
             d.textContent = s || '';
             return d.innerHTML;
         }
@@ -701,9 +710,9 @@
         }
 
         function download(content, filename, type) {
-            const blob = new Blob([content], { type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            var blob = new Blob([content], { type: type });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url; a.download = filename; a.click();
             URL.revokeObjectURL(url);
         }
@@ -712,9 +721,9 @@
             if (!aff) return '';
             try {
                 if (aff.startsWith('[')) {
-                    const parsed = JSON.parse(aff.replace(/'/g, '"'));
+                    var parsed = JSON.parse(aff.replace(/'/g, '"'));
                     if (Array.isArray(parsed)) {
-                        return parsed.map(a => a.Affiliation || a.affiliation || '').filter(Boolean).join(' | ');
+                        return parsed.map(function(a) { return a.Affiliation || a.affiliation || ''; }).filter(Boolean).join(' | ');
                     }
                 }
             } catch(e) {}
@@ -723,41 +732,45 @@
 
         // ===================== EVENT LISTENERS =====================
 
-        document.getElementById('search').addEventListener('input', e => searchAuthors(e.target.value));
+        document.getElementById('search').addEventListener('input', function(e) { searchAuthors(e.target.value); });
 
-        document.getElementById('sort-by').addEventListener('change', e => {
-            const f = e.target.value;
+        document.getElementById('sort-by').addEventListener('change', function(e) {
+            var f = e.target.value;
             sortData(f, f === 'author_name' ? 'asc' : 'desc');
             renderTable();
         });
 
-        document.getElementById('per-page').addEventListener('change', e => {
-            perPage = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
+        document.getElementById('per-page').addEventListener('change', function(e) {
+            if (e.target.value === 'all') {
+                perPage = 'all';
+            } else {
+                perPage = parseInt(e.target.value, 10) || 50;
+            }
             currentPage = 1;
             renderTable();
         });
 
-        document.querySelectorAll('#author-table th.sortable').forEach(th => {
-            th.addEventListener('click', () => {
-                const f = th.dataset.sort;
-                const dir = currentSort.field === f && currentSort.direction === 'desc' ? 'asc' : 'desc';
+        document.querySelectorAll('#author-table th.sortable').forEach(function(th) {
+            th.addEventListener('click', function() {
+                var f = th.dataset.sort;
+                var dir = (currentSort.field === f && currentSort.direction === 'desc') ? 'asc' : 'desc';
                 sortData(f, dir);
                 renderTable();
             });
         });
 
-        document.getElementById('paper-search').addEventListener('input', e => searchPapers(e.target.value));
+        document.getElementById('paper-search').addEventListener('input', function(e) { searchPapers(e.target.value); });
 
-        document.getElementById('paper-sort').addEventListener('change', e => {
-            const f = e.target.value;
+        document.getElementById('paper-sort').addEventListener('change', function(e) {
+            var f = e.target.value;
             sortPapers(f, f === 'title' ? 'asc' : 'desc');
             renderPapers();
         });
 
-        document.querySelectorAll('#papers-table th.sortable').forEach(th => {
-            th.addEventListener('click', () => {
-                const f = th.dataset.psort;
-                const dir = paperSort.field === f && paperSort.direction === 'desc' ? 'asc' : 'desc';
+        document.querySelectorAll('#papers-table th.sortable').forEach(function(th) {
+            th.addEventListener('click', function() {
+                var f = th.dataset.psort;
+                var dir = (paperSort.field === f && paperSort.direction === 'desc') ? 'asc' : 'desc';
                 sortPapers(f, dir);
                 renderPapers();
             });
