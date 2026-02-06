@@ -15,7 +15,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1800px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -25,6 +25,7 @@
 
         h1 { color: #2d3748; margin-bottom: 10px; font-size: 2.5em; }
         h2 { color: #2d3748; margin-bottom: 15px; font-size: 1.8em; }
+        h3 { color: #2d3748; margin-bottom: 10px; }
 
         .subtitle { color: #718096; margin-bottom: 30px; font-size: 1.1em; }
 
@@ -87,10 +88,7 @@
 
         button:hover, .btn:hover { transform: translateY(-2px); }
 
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #2d3748;
-        }
+        .table-wrap { overflow-x: auto; }
 
         table {
             width: 100%;
@@ -102,7 +100,7 @@
         thead { background: #f7fafc; position: sticky; top: 0; z-index: 10; }
 
         th {
-            padding: 15px;
+            padding: 10px 8px;
             text-align: left;
             font-weight: 600;
             color: #2d3748;
@@ -110,6 +108,7 @@
             cursor: pointer;
             user-select: none;
             white-space: nowrap;
+            font-size: 0.85em;
         }
 
         th:hover { background: #edf2f7; }
@@ -117,7 +116,16 @@
         th.sorted-asc::after { content: ' \2191'; opacity: 1; }
         th.sorted-desc::after { content: ' \2193'; opacity: 1; }
 
-        td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; }
+        /* PlumX column header colors */
+        th.px-cit { border-top: 3px solid #3b82f6; }
+        th.px-cap { border-top: 3px solid #f59e0b; }
+        th.px-men { border-top: 3px solid #10b981; }
+        th.px-soc { border-top: 3px solid #8b5cf6; }
+        th.px-use { border-top: 3px solid #ec4899; }
+        th.px-news { border-top: 3px solid #06b6d4; }
+        th.px-read { border-top: 3px solid #f97316; }
+
+        td { padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.9em; }
         tr:hover { background: #f7fafc; }
         tr.clickable { cursor: pointer; }
         tr.clickable:hover { background: #edf2f7; }
@@ -130,7 +138,6 @@
             background: #edf2f7;
             border-radius: 4px;
             font-size: 0.9em;
-            margin: 2px;
         }
 
         .h-index-high { background: #d4edda; color: #155724; }
@@ -143,6 +150,7 @@
             justify-content: center;
             gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .page-btn {
@@ -165,12 +173,7 @@
         .author-detail.active { display: block; }
         .author-list.hidden { display: none; }
 
-        .back-btn {
-            margin-bottom: 20px;
-            background: #e2e8f0;
-            color: #2d3748;
-            font-weight: 600;
-        }
+        .back-btn { margin-bottom: 20px; background: #e2e8f0; color: #2d3748; font-weight: 600; }
 
         .author-header {
             display: flex;
@@ -201,33 +204,7 @@
 
         .author-metric-card .value { font-size: 1.6em; font-weight: bold; color: #667eea; }
         .author-metric-card .label { font-size: 0.8em; color: #718096; margin-top: 4px; }
-
-        .plumx-bar {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .plumx-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            font-weight: 500;
-        }
-
-        .plumx-citations { background: #dbeafe; color: #1e40af; }
-        .plumx-captures { background: #fef3c7; color: #92400e; }
-        .plumx-mentions { background: #d1fae5; color: #065f46; }
-        .plumx-social { background: #ede9fe; color: #5b21b6; }
-        .plumx-usage { background: #fce7f3; color: #9d174d; }
-        .plumx-none { background: #f3f4f6; color: #9ca3af; }
-
-        .paper-title { font-weight: 500; }
-        .paper-doi a { color: #667eea; text-decoration: none; font-size: 0.85em; }
-        .paper-doi a:hover { text-decoration: underline; }
+        .author-metric-card.plumx-card { border-left: 3px solid #667eea; }
 
         .top-paper-badge {
             display: inline-block;
@@ -240,9 +217,31 @@
             margin-left: 6px;
         }
 
+        .paper-title { font-weight: 500; }
+        .paper-doi a { color: #667eea; text-decoration: none; font-size: 0.85em; }
+        .paper-doi a:hover { text-decoration: underline; }
+
+        .section-label {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #a0aec0;
+            padding: 8px 8px 4px;
+            font-weight: 600;
+        }
+
+        /* Colored PlumX cell values */
+        .px-val-cit { color: #2563eb; font-weight: 500; }
+        .px-val-cap { color: #d97706; font-weight: 500; }
+        .px-val-men { color: #059669; font-weight: 500; }
+        .px-val-soc { color: #7c3aed; font-weight: 500; }
+        .px-val-use { color: #db2777; font-weight: 500; }
+        .px-val-news { color: #0891b2; font-weight: 500; }
+        .px-val-read { color: #ea580c; font-weight: 500; }
+
         @media (max-width: 768px) {
             .container { padding: 20px; }
-            table { font-size: 0.85em; }
+            table { font-size: 0.8em; }
             .controls { flex-direction: column; }
             input[type="text"] { width: 100%; }
             h1 { font-size: 1.8em; }
@@ -282,9 +281,10 @@
                     <option value="total_citations">Sort by Citations</option>
                     <option value="total_publications">Sort by Publications</option>
                     <option value="i10_index">Sort by i10-index</option>
-                    <option value="avg_citations_per_paper">Sort by Avg Citations</option>
-                    <option value="career_span_years">Sort by Career Span</option>
-                    <option value="recent_publications_5yr">Sort by Recent Pubs (5yr)</option>
+                    <option value="plumx_citations">Sort by PlumX Citations</option>
+                    <option value="plumx_captures">Sort by PlumX Captures</option>
+                    <option value="plumx_mentions">Sort by PlumX Mentions</option>
+                    <option value="plumx_news">Sort by PlumX News</option>
                     <option value="author_name">Sort by Name</option>
                 </select>
                 <select id="per-page">
@@ -299,6 +299,7 @@
             <div id="loading" class="loading">Loading data...</div>
 
             <div id="table-container" style="display: none;">
+                <div class="table-wrap">
                 <table id="author-table">
                     <thead>
                         <tr>
@@ -309,14 +310,20 @@
                             <th class="sortable" data-sort="total_publications">Pubs</th>
                             <th class="sortable" data-sort="total_citations">Citations</th>
                             <th class="sortable" data-sort="avg_citations_per_paper">Avg Cit.</th>
-                            <th class="sortable" data-sort="recent_publications_5yr">5yr Pubs</th>
-                            <th class="sortable" data-sort="recent_citations_5yr">5yr Cit.</th>
-                            <th class="sortable" data-sort="papers_with_plumx">PlumX</th>
                             <th class="sortable" data-sort="career_span_years">Span</th>
+                            <th class="sortable" data-sort="recent_publications_5yr">5yr Pubs</th>
+                            <th class="sortable px-cit" data-sort="plumx_citations">PX Cit.</th>
+                            <th class="sortable px-cap" data-sort="plumx_captures">PX Cap.</th>
+                            <th class="sortable px-read" data-sort="plumx_readers">PX Read.</th>
+                            <th class="sortable px-men" data-sort="plumx_mentions">PX Men.</th>
+                            <th class="sortable px-news" data-sort="plumx_news">PX News</th>
+                            <th class="sortable px-soc" data-sort="plumx_social_media">PX Soc.</th>
+                            <th class="sortable px-use" data-sort="plumx_usage">PX Use</th>
                         </tr>
                     </thead>
                     <tbody id="table-body"></tbody>
                 </table>
+                </div>
                 <div class="pagination" id="pagination"></div>
             </div>
         </div>
@@ -341,15 +348,21 @@
                 <input type="text" id="paper-search" placeholder="Search papers by title or DOI...">
                 <select id="paper-sort">
                     <option value="year">Sort by Year</option>
-                    <option value="cited_by">Sort by Citations</option>
-                    <option value="plumx_citations">Sort by PlumX Citations</option>
-                    <option value="captures">Sort by Captures</option>
+                    <option value="cited_by">Sort by Scopus Citations</option>
+                    <option value="px_citation_total">Sort by PlumX Citations</option>
+                    <option value="px_capture_total">Sort by Captures</option>
+                    <option value="px_reader_count">Sort by Readers</option>
+                    <option value="px_mention_total">Sort by Mentions</option>
+                    <option value="px_news_count">Sort by News</option>
+                    <option value="px_social_media">Sort by Social Media</option>
+                    <option value="px_usage_count">Sort by Usage</option>
                     <option value="title">Sort by Title</option>
                 </select>
             </div>
 
             <div id="detail-loading" class="loading" style="display:none;">Loading papers...</div>
 
+            <div class="table-wrap">
             <table id="papers-table" style="display:none;">
                 <thead>
                     <tr>
@@ -357,11 +370,18 @@
                         <th class="sortable" data-psort="title">Title</th>
                         <th class="sortable" data-psort="year">Year</th>
                         <th class="sortable" data-psort="cited_by">Cited By</th>
-                        <th>PlumX Metrics</th>
+                        <th class="sortable px-cit" data-psort="px_citation_total">PX Cit.</th>
+                        <th class="sortable px-cap" data-psort="px_capture_total">PX Cap.</th>
+                        <th class="sortable px-read" data-psort="px_reader_count">PX Read.</th>
+                        <th class="sortable px-men" data-psort="px_mention_total">PX Men.</th>
+                        <th class="sortable px-news" data-psort="px_news_count">PX News</th>
+                        <th class="sortable px-soc" data-psort="px_social_media">PX Soc.</th>
+                        <th class="sortable px-use" data-psort="px_usage_count">PX Use</th>
                     </tr>
                 </thead>
                 <tbody id="papers-body"></tbody>
             </table>
+            </div>
 
             <div class="pagination" id="papers-pagination"></div>
         </div>
@@ -447,10 +467,15 @@
                     <td>${a.total_publications.toLocaleString()}</td>
                     <td>${a.total_citations.toLocaleString()}</td>
                     <td>${a.avg_citations_per_paper.toFixed(1)}</td>
-                    <td>${a.recent_publications_5yr}</td>
-                    <td>${(a.recent_citations_5yr||0).toLocaleString()}</td>
-                    <td>${a.papers_with_plumx}</td>
                     <td>${a.career_span_years}yr</td>
+                    <td>${a.recent_publications_5yr}</td>
+                    <td class="px-val-cit">${(a.plumx_citations||0).toLocaleString()}</td>
+                    <td class="px-val-cap">${(a.plumx_captures||0).toLocaleString()}</td>
+                    <td class="px-val-read">${(a.plumx_readers||0).toLocaleString()}</td>
+                    <td class="px-val-men">${(a.plumx_mentions||0).toLocaleString()}</td>
+                    <td class="px-val-news">${(a.plumx_news||0).toLocaleString()}</td>
+                    <td class="px-val-soc">${(a.plumx_social_media||0).toLocaleString()}</td>
+                    <td class="px-val-use">${(a.plumx_usage||0).toLocaleString()}</td>
                 `;
             });
             renderPagination('pagination', filteredData.length, perPage, currentPage, changePage);
@@ -463,17 +488,14 @@
             if (totalPages <= 1) { el.innerHTML = ''; return; }
 
             let html = `<button class="page-btn" ${page===1?'disabled':''} onclick="${callback.name}(${page-1})">Prev</button>`;
-
             let startP = Math.max(1, page - 4);
             let endP = Math.min(totalPages, startP + 9);
             if (endP - startP < 9) startP = Math.max(1, endP - 9);
-
             if (startP > 1) html += `<button class="page-btn" onclick="${callback.name}(1)">1</button><span>...</span>`;
             for (let i = startP; i <= endP; i++) {
                 html += `<button class="page-btn ${i===page?'active':''}" onclick="${callback.name}(${i})">${i}</button>`;
             }
             if (endP < totalPages) html += `<span>...</span><button class="page-btn" onclick="${callback.name}(${totalPages})">${totalPages}</button>`;
-
             html += `<button class="page-btn" ${page===totalPages?'disabled':''} onclick="${callback.name}(${page+1})">Next</button>`;
             el.innerHTML = html;
         }
@@ -500,14 +522,20 @@
                 'Total Pubs','Total Citations','Avg Citations','Career Span',
                 'First Year','Latest Year','Productivity Rate',
                 'Recent Pubs 5yr','Recent Citations 5yr',
-                'Top Paper Citations','Top Paper Title','Papers with PlumX'];
+                'Top Paper Citations','Top Paper Title','Papers with PlumX',
+                'PlumX Citations','PlumX Captures','PlumX Readers','PlumX Mentions',
+                'PlumX News','PlumX Social Media','PlumX Usage',
+                'PlumX Scopus Cit.','PlumX CrossRef Cit.'];
             const rows = filteredData.map((a, i) => [
                 i+1, csvQ(a.author_name), csvQ(a.full_name), csvQ(a.affiliation),
                 a.h_index, a.i10_index, a.total_publications, a.total_citations,
                 a.avg_citations_per_paper, a.career_span_years,
                 a.first_publication_year, a.latest_publication_year, a.productivity_rate,
                 a.recent_publications_5yr, a.recent_citations_5yr,
-                a.top_paper_citations, csvQ(a.top_paper_title), a.papers_with_plumx
+                a.top_paper_citations, csvQ(a.top_paper_title), a.papers_with_plumx,
+                a.plumx_citations||0, a.plumx_captures||0, a.plumx_readers||0,
+                a.plumx_mentions||0, a.plumx_news||0, a.plumx_social_media||0, a.plumx_usage||0,
+                a.plumx_scopus_citations||0, a.plumx_crossref_citations||0
             ]);
             const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
             download(csv, 'rcr_author_metrics.csv', 'text/csv');
@@ -515,13 +543,28 @@
 
         // ===================== AUTHOR DETAIL =====================
 
+        function pxVal(paper, field) {
+            if (!paper.plumx) return 0;
+            return paper.plumx[field] || 0;
+        }
+
+        function getPaperSortVal(p, field) {
+            if (field === 'title') return p.title || '';
+            if (field === 'year') return p.year || 0;
+            if (field === 'cited_by') return p.cited_by || 0;
+            if (field.startsWith('px_')) {
+                const pxField = field.substring(3); // remove 'px_'
+                return pxVal(p, pxField);
+            }
+            return 0;
+        }
+
         async function showAuthorDetail(authorId) {
             document.getElementById('author-list-view').classList.add('hidden');
             document.getElementById('author-detail-view').classList.add('active');
             document.getElementById('detail-loading').style.display = 'block';
             document.getElementById('papers-table').style.display = 'none';
 
-            // Fill summary from already-loaded data
             const author = authorsData.find(a => a.author_id === authorId);
             if (author) {
                 document.getElementById('detail-name').textContent = author.full_name || author.author_name;
@@ -531,17 +574,21 @@
                     <div class="author-metric-card"><div class="value">${author.h_index}</div><div class="label">h-index</div></div>
                     <div class="author-metric-card"><div class="value">${author.i10_index}</div><div class="label">i10-index</div></div>
                     <div class="author-metric-card"><div class="value">${author.total_publications.toLocaleString()}</div><div class="label">Publications</div></div>
-                    <div class="author-metric-card"><div class="value">${author.total_citations.toLocaleString()}</div><div class="label">Citations</div></div>
+                    <div class="author-metric-card"><div class="value">${author.total_citations.toLocaleString()}</div><div class="label">Scopus Citations</div></div>
                     <div class="author-metric-card"><div class="value">${author.avg_citations_per_paper.toFixed(1)}</div><div class="label">Avg Citations</div></div>
                     <div class="author-metric-card"><div class="value">${author.career_span_years}</div><div class="label">Career (years)</div></div>
                     <div class="author-metric-card"><div class="value">${author.recent_publications_5yr}</div><div class="label">5yr Pubs</div></div>
                     <div class="author-metric-card"><div class="value">${(author.recent_citations_5yr||0).toLocaleString()}</div><div class="label">5yr Citations</div></div>
-                    <div class="author-metric-card"><div class="value">${author.papers_with_plumx}</div><div class="label">PlumX Coverage</div></div>
-                    <div class="author-metric-card"><div class="value">${author.productivity_rate}</div><div class="label">Pubs/Year</div></div>
+                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_citations||0).toLocaleString()}</div><div class="label">PlumX Citations</div></div>
+                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_captures||0).toLocaleString()}</div><div class="label">PlumX Captures</div></div>
+                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_readers||0).toLocaleString()}</div><div class="label">PlumX Readers</div></div>
+                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_mentions||0).toLocaleString()}</div><div class="label">PlumX Mentions</div></div>
+                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_news||0).toLocaleString()}</div><div class="label">PlumX News</div></div>
+                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_social_media||0).toLocaleString()}</div><div class="label">PlumX Social</div></div>
+                    <div class="author-metric-card plumx-card"><div class="value">${(author.plumx_usage||0).toLocaleString()}</div><div class="label">PlumX Usage</div></div>
                 `;
             }
 
-            // Load per-author paper data
             try {
                 const resp = await fetch(`authors/${authorId}.json`);
                 const data = await resp.json();
@@ -569,20 +616,17 @@
         function sortPapers(field, direction) {
             paperSort = { field, direction };
             filteredPapers.sort((a, b) => {
-                let av, bv;
-                if (field === 'title') {
-                    return direction === 'asc' ? (a.title||'').localeCompare(b.title||'') : (b.title||'').localeCompare(a.title||'');
-                } else if (field === 'plumx_citations') {
-                    av = a.plumx ? (a.plumx.citation_total || 0) : 0;
-                    bv = b.plumx ? (b.plumx.citation_total || 0) : 0;
-                } else if (field === 'captures') {
-                    av = a.plumx ? (a.plumx.capture_total || 0) : 0;
-                    bv = b.plumx ? (b.plumx.capture_total || 0) : 0;
-                } else {
-                    av = a[field] || 0;
-                    bv = b[field] || 0;
+                const av = getPaperSortVal(a, field);
+                const bv = getPaperSortVal(b, field);
+                if (typeof av === 'string') {
+                    return direction === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
                 }
                 return direction === 'asc' ? av - bv : bv - av;
+            });
+            // Update header indicators
+            document.querySelectorAll('#papers-table th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (th.dataset.psort === field) th.classList.add(`sorted-${direction}`);
             });
         }
 
@@ -592,27 +636,11 @@
             const start = (paperPage - 1) * papersPerPage;
             const end = start + papersPerPage;
             const page = filteredPapers.slice(start, end);
-
             const maxCited = Math.max(...currentAuthorPapers.map(p => p.cited_by || 0));
 
             page.forEach((p, i) => {
                 const row = tbody.insertRow();
                 const isTop = p.cited_by === maxCited && maxCited > 0;
-
-                let plumxHtml = '';
-                if (p.plumx) {
-                    const px = p.plumx;
-                    const chips = [];
-                    if (px.citation_total) chips.push(`<span class="plumx-chip plumx-citations">Cit: ${px.citation_total}</span>`);
-                    if (px.capture_total) chips.push(`<span class="plumx-chip plumx-captures">Cap: ${px.capture_total}</span>`);
-                    if (px.mention_total) chips.push(`<span class="plumx-chip plumx-mentions">Men: ${px.mention_total}</span>`);
-                    if (px.social_media) chips.push(`<span class="plumx-chip plumx-social">Soc: ${px.social_media}</span>`);
-                    if (px.usage_count) chips.push(`<span class="plumx-chip plumx-usage">Use: ${px.usage_count}</span>`);
-                    plumxHtml = chips.length ? `<div class="plumx-bar">${chips.join('')}</div>` : '<span class="plumx-chip plumx-none">No metrics</span>';
-                } else {
-                    plumxHtml = '<span class="plumx-chip plumx-none">N/A</span>';
-                }
-
                 const doiLink = p.doi ? `<div class="paper-doi"><a href="https://doi.org/${p.doi}" target="_blank">${p.doi}</a></div>` : '';
 
                 row.innerHTML = `
@@ -623,11 +651,24 @@
                     </td>
                     <td>${p.year || '-'}</td>
                     <td>${(p.cited_by||0).toLocaleString()}</td>
-                    <td>${plumxHtml}</td>
+                    <td class="px-val-cit">${fmtPx(p,'citation_total')}</td>
+                    <td class="px-val-cap">${fmtPx(p,'capture_total')}</td>
+                    <td class="px-val-read">${fmtPx(p,'reader_count')}</td>
+                    <td class="px-val-men">${fmtPx(p,'mention_total')}</td>
+                    <td class="px-val-news">${fmtPx(p,'news_count')}</td>
+                    <td class="px-val-soc">${fmtPx(p,'social_media')}</td>
+                    <td class="px-val-use">${fmtPx(p,'usage_count')}</td>
                 `;
             });
 
             renderPagination('papers-pagination', filteredPapers.length, papersPerPage, paperPage, changePaperPage);
+        }
+
+        function fmtPx(paper, field) {
+            if (!paper.plumx) return '<span style="color:#d1d5db">-</span>';
+            const v = paper.plumx[field];
+            if (v === null || v === undefined || v === 0) return '0';
+            return v.toLocaleString();
         }
 
         function changePaperPage(p) { paperPage = p; renderPapers(); }
@@ -669,7 +710,6 @@
 
         function cleanAffiliation(aff) {
             if (!aff) return '';
-            // Handle JSON-like affiliation strings from the database
             try {
                 if (aff.startsWith('[')) {
                     const parsed = JSON.parse(aff.replace(/'/g, '"'));
